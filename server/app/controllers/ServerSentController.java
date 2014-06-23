@@ -13,13 +13,14 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import common.BaseEvent;
 import common.EventSource;
+import views.html.*;
 
 /**
  * SSE API controller
  * 
  * @author spamoc
  */
-public class ServerSentsController extends Controller {
+public class ServerSentController extends Controller {
 
     /**
      * get event API
@@ -32,12 +33,14 @@ public class ServerSentsController extends Controller {
                 Logger.debug("connected");
                 Object obj = Cache.get("sample");
                 if (obj != null) {
-                    Logger.debug("write");
+                    Logger.debug("write" + obj.toString());
                     ObjectMapper mapper = new ObjectMapper();
                     try {
                         JsonNode node = mapper.readTree(obj.toString());
                         BaseEvent event = new BaseEvent((ObjectNode)node);
+                        event.withRetry(10000);
                         sendMessage(event);
+                        Cache.remove("sample");
                     } catch (IOException e) {
                         Logger.error("cache json parse error, "+ e);
                     }
@@ -59,5 +62,9 @@ public class ServerSentsController extends Controller {
         Cache.set("sample", node);
         result.put("set_data", node);
         return ok(result);
+    }
+    
+    public static Result index(){
+        return ok(sse.render());
     }
 }

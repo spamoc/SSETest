@@ -1,26 +1,60 @@
 package common;
 
-import org.codehaus.jackson.node.ObjectNode;
-
-import play.libs.Json;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * SSE abstract event(must extend this)
+ * 
  * @author spamoc
  */
 public abstract class Event {
-    private ObjectNode node = Json.newObject();
-    
-    
-    public ObjectNode getNode(){
-        return this.node;
+    private String message;
+    private final Map<String, String> fields = new HashMap<String, String>();
+
+    /**
+     * Create an event
+     * 
+     * @param message
+     *            The message to send
+     */
+    public Event(String message) {
+        this.message = message;
+    }
+
+    /**
+     * Set the id for the event
+     */
+    public Event withId(String id) {
+        if (id != null) {
+            fields.put("id", id);
+        }
+        return this;
+    }
+
+    /**
+     * Set the name for the event
+     */
+    public Event withName(String name) {
+        if (name != null) {
+            fields.put("name", name);
+        }
+        return this;
+    }
+
+    /**
+     * Set the reconnection timeout that the client should use
+     */
+    public Event withRetry(int milliseconds) {
+        fields.put("retry", Integer.toString(milliseconds));
+        return this;
     }
     
-    public void setNode(ObjectNode node){
-        this.node = node;
+    public String getMessage(){
+        return this.message;
     }
-    @Override
-    public String toString(){
-        return this.node.toString();
+    public Map<String, String> getFields(){
+        return this.fields;
     }
+
 }

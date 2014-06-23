@@ -1,5 +1,7 @@
 package common;
 
+import java.util.Map;
+
 import play.libs.F.Callback0;
 import play.mvc.Results.Chunks;
 
@@ -33,7 +35,14 @@ public abstract class EventSource extends Chunks<String> {
      * Send an event on this socket.
      */
     public void sendMessage(Event event) {
-        out.write(event.toString());
+        StringBuilder buffer = new StringBuilder();
+        for (Map.Entry<String, String> field: event.getFields().entrySet()) {
+            buffer.append(field.getKey()).append(":").append(field.getValue()).append("\r\n");
+        }
+        buffer.append("data:").append(event.getMessage().replaceAll("\r?\n", "\r\ndata:")).append("\r\n\r\n");
+        out.write(buffer.toString());
+
+        out.write("data:"+event.getMessage());
     }
 
     /**
